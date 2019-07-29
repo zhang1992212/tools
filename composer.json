@@ -1,0 +1,10 @@
+{
+    "name": "geek1992/redis",
+    "authors": [
+        {
+            "name": "geek",
+            "email": "zhangjinlei01@bilibili.com"
+        }
+    ],
+    "require": {}
+}
