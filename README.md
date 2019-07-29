@@ -1,4 +1,5 @@
 # redis
+```$xslt
 $config = [
     'host'       => '127.0.0.1',
     'port'       => 6379,
@@ -14,3 +15,5 @@ $redis = \geek1992\redis\library\Redis::getInstance($config);
 $redis->set('a', 1);
 
 print_r($redis->get('a'));
+```
+
