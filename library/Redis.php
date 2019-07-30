@@ -1,5 +1,5 @@
 <?php
-namespace geek1992\redis\library;
+namespace geek1992\tools\library;
 
 /**
  * @author: Geek <zhangjinlei01@bilibili.com>
@@ -77,4 +77,14 @@ class Redis
         return $name ? static::$config[$name] : static::$config;
     }
 
+    /**
+     * 获取缓存的key
+     * @param string $namespace
+     * @param string|null $prefix
+     * @return string
+     */
+    public static function getKey(string $namespace, ?string $prefix = null): string
+    {
+        return trim(strtoupper(trim(strtr($namespace, ['\\' => ':']), ':') . ':' . ($prefix ? trim($prefix, ':') . ':' : '')), ":");
+    }
 }
