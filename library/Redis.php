@@ -2,19 +2,21 @@
 namespace geek1992\tools\library;
 
 /**
+ * REDIS 缓存类
  * @author: Geek <zhangjinlei01@bilibili.com>
  */
 class Redis
 {
+    private const KEY = 'REDIS';
     /**
      * @var \Redis
      */
-    private static $instance = null;
+    private static $instance = [];
 
-    protected static $config = [
+    private static $config = [
         'host'       => '127.0.0.1',
         'port'       => 6379,
-        'auth'   => '',
+        'auth'       => '',
         'select'     => 0,
         'timeout'    => 0,
         'expire'     => 0,
@@ -22,31 +24,46 @@ class Redis
         'prefix'     => '',
     ];
 
-    private function __construct(array $options = [])
+    private function __construct()
     {
 
     }
 
-    protected function __clone()
+    private function __clone()
     {
     }
 
+    /**
+     * 根据不同的数组参数生成不同的key
+     * @param array $key
+     * @return string
+     */
+    private static function getInstanceKey(array $key = []):string
+    {
+        return md5(static::KEY . md5(http_build_query($key)));
+    }
+
+    /**
+     * 根据不同的配置项生成不同REDIS实例
+     * @param array $options
+     * @return \Redis
+     */
     public static function getInstance(array $options = []):\Redis
     {
-        if (static::$instance === null){
-            if (!empty($options)) {
-                static::$config = array_merge(static::$config, $options);
-            }
-            static::connect();
+        static::$config = array_merge(static::$config, $options);
+        $key = static::getInstanceKey(static::$config);
+
+        if (empty(static::$instance) || !isset(static::$instance[$key])){
+            static::$instance[$key] = static::connect();
         }
-        return static::$instance;
+        return static::$instance[$key];
     }
 
     /**
      * 连接redis
      * @return bool
      */
-    private static function connect(): bool
+    private static function connect(): ?\Redis
     {
         try{
             $config = static::getConfig();
@@ -65,14 +82,18 @@ class Redis
                 $redis->select($config['select']);
             }
 
-            static::$instance = $redis;
-            return true;
+            return $redis;
         } catch (\Exception $e){
-            return false;
+            return null;
         }
     }
 
-    protected static function getConfig(string $name = '')
+    /**
+     * 获取配置项信息
+     * @param string $name
+     * @return array|mixed
+     */
+    private static function getConfig(string $name = '')
     {
         return $name ? static::$config[$name] : static::$config;
     }
