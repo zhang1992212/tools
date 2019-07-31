@@ -8,6 +8,7 @@ namespace geek1992\tools\library;
 class Redis
 {
     private const KEY = 'REDIS';
+
     /**
      * @var \Redis
      */
@@ -31,6 +32,7 @@ class Redis
 
     private function __clone()
     {
+
     }
 
     /**
@@ -50,24 +52,23 @@ class Redis
      */
     public static function getInstance(array $options = []):\Redis
     {
-        static::$config = array_merge(static::$config, $options);
-        $key = static::getInstanceKey(static::$config);
+        $config = array_merge(static::$config, $options);
+        $key = static::getInstanceKey($config);
 
         if (empty(static::$instance) || !isset(static::$instance[$key])){
-            static::$instance[$key] = static::connect();
+            static::$instance[$key] = static::connect($config);
         }
         return static::$instance[$key];
     }
 
     /**
      * 连接redis
-     * @return bool
+     * @param arrry $config
+     * @return \Redis|null
      */
-    private static function connect(): ?\Redis
+    private static function connect(array $config = []): ?\Redis
     {
         try{
-            $config = static::getConfig();
-
             $redis = new \Redis();
             if ($config['persistent']) {
                 $redis->pconnect($config['host'], $config['port'], $config['timeout'], 'persistent_id_' . $config['select']);
@@ -86,16 +87,6 @@ class Redis
         } catch (\Exception $e){
             return null;
         }
-    }
-
-    /**
-     * 获取配置项信息
-     * @param string $name
-     * @return array|mixed
-     */
-    private static function getConfig(string $name = '')
-    {
-        return $name ? static::$config[$name] : static::$config;
     }
 
     /**
