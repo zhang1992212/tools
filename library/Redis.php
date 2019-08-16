@@ -55,7 +55,7 @@ class Redis
         $config = array_merge(static::$config, $options);
         $key = static::getInstanceKey($config);
 
-        if (empty(static::$instance) || !isset(static::$instance[$key])){
+        if (empty(static::$instance) || !isset(static::$instance[$key]) || empty(static::$instance[$key])){
             static::$instance[$key] = static::connect($config);
         }
         return static::$instance[$key];
@@ -63,30 +63,25 @@ class Redis
 
     /**
      * 连接redis
-     * @param arrry $config
+     * @param array $config
      * @return \Redis|null
      */
     private static function connect(array $config = []): ?\Redis
     {
-        try{
             $redis = new \Redis();
             if ($config['persistent']) {
-                $redis->pconnect($config['host'], $config['port'], $config['timeout'], 'persistent_id_' . $config['select']);
+                $redis->pconnect($config['host'], (int)$config['port'], $config['timeout'], 'persistent_id_' . $config['select']);
             } else {
-                $redis->connect($config['host'], $config['port'], $config['timeout']);
+                $redis->connect($config['host'], (int)$config['port'], $config['timeout']);
             }
             if ($config['auth']) {
                 $redis->auth($config['auth']);
-
             }
+
             if ($config['select']) {
                 $redis->select($config['select']);
             }
-
             return $redis;
-        } catch (\Exception $e){
-            return null;
-        }
     }
 
     /**
