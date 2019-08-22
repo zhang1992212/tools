@@ -12,9 +12,9 @@ class Redis
     /**
      * @var \Redis
      */
-    private static $instance = [];
+    private $instance = [];
 
-    private static $config = [
+    private $config = [
         'host'       => '127.0.0.1',
         'port'       => 6379,
         'auth'       => '',
@@ -24,23 +24,14 @@ class Redis
         'persistent' => false,
         'prefix'     => '',
     ];
-
-    private function __construct()
-    {
-
-    }
-
-    private function __clone()
-    {
-
-    }
+    
 
     /**
      * 根据不同的数组参数生成不同的key
      * @param array $key
      * @return string
      */
-    private static function getInstanceKey(array $key = []):string
+    private function getInstanceKey(array $key = []):string
     {
         return md5(static::KEY . md5(http_build_query($key)));
     }
@@ -50,15 +41,15 @@ class Redis
      * @param array $options
      * @return \Redis
      */
-    public static function getInstance(array $options = []):\Redis
+    public function getInstance(array $options = []):\Redis
     {
-        $config = array_merge(static::$config, $options);
-        $key = static::getInstanceKey($config);
+        $config = array_merge($this->config, $options);
+        $key = $this->getInstanceKey($config);
 
-        if (empty(static::$instance) || !isset(static::$instance[$key]) || empty(static::$instance[$key])){
-            static::$instance[$key] = static::connect($config);
+        if (empty($this->instance) || !isset($this->instance[$key]) || empty($this->instance[$key])){
+            $this->instance[$key] = $this->connect($config);
         }
-        return static::$instance[$key];
+        return $this->instance[$key];
     }
 
     /**
@@ -66,7 +57,7 @@ class Redis
      * @param array $config
      * @return \Redis|null
      */
-    private static function connect(array $config = []): ?\Redis
+    private function connect(array $config = []): ?\Redis
     {
             $redis = new \Redis();
             if ($config['persistent']) {
@@ -90,8 +81,9 @@ class Redis
      * @param string|null $prefix
      * @return string
      */
-    public static function getKey(string $namespace, ?string $prefix = null): string
+    public function getKey(string $namespace, ?string $prefix = null): string
     {
         return trim(strtoupper(trim(strtr($namespace, ['\\' => ':']), ':') . ':' . ($prefix ? trim($prefix, ':') . ':' : '')), ":");
     }
+
 }
